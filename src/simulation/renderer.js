@@ -5,7 +5,7 @@ export function render(ctx, network) {
     
     network.roads.forEach(road => drawRoad(ctx, road))
     
-    network.intersections.forEach(int => drawIntersection(ctx, int))
+    network.intersections.forEach(intersection => drawIntersection(ctx, intersection))
 }
 
 function drawRoad(ctx, road) {
@@ -13,28 +13,26 @@ function drawRoad(ctx, road) {
     ctx.lineWidth = ROAD_WIDTH
     ctx.lineCap = 'square'
     ctx.beginPath()
-    ctx.moveTo(road.intersectionA.x, road.intersectionA.y)
-    ctx.lineTo(road.intersectionB.x, road.intersectionB.y)
+    ctx.moveTo(road.start.x, road.start.y)
+    ctx.lineTo(road.end.x, road.end.y)
     ctx.stroke()
     
     ctx.strokeStyle = '#ffffff'
     ctx.lineWidth = 5
     ctx.setLineDash([20, 20])
     ctx.beginPath()
-    ctx.moveTo(road.intersectionA.x, road.intersectionA.y)
-    ctx.lineTo(road.intersectionB.x, road.intersectionB.y)
+    ctx.moveTo(road.start.x, road.start.y)
+    ctx.lineTo(road.end.x, road.end.y)
     ctx.stroke()
     ctx.setLineDash([])
 }
 
 function drawIntersection(ctx, intersection) {
-    if (intersection.roads.length >= 2) {
-        ctx.fillStyle = '#1f2937'
-        ctx.fillRect(
-            intersection.x - ROAD_WIDTH / 2,
-            intersection.y - ROAD_WIDTH / 2,
-            ROAD_WIDTH,
-            ROAD_WIDTH
-        )
-    }
+    ctx.fillStyle = '#1f2937'
+    ctx.fillRect(
+        intersection.x - ROAD_WIDTH / 2,
+        intersection.y - ROAD_WIDTH / 2,
+        ROAD_WIDTH,
+        ROAD_WIDTH
+    )
 }

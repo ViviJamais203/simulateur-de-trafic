@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { buildPetiteVille } from '../networks/petiteVille.js'
+import { buildCarrefourMort } from "../networks/carrefourMort.js";
 import { render } from '../simulation/renderer.js'
 
 export function SimulationCanvas() {

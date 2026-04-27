@@ -3,12 +3,10 @@ export class Intersection {
         this.id = id
         this.x = x
         this.y = y
-
-        this.trafficLight = null
-        
         this.roads = []
+        this.trafficLight = null
     }
-
+    
     addRoad(road) {
         this.roads.push(road)
     }

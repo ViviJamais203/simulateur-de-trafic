@@ -1,19 +1,17 @@
-export class Road{
-    constructor(id, intersectionA, intersectionB, speedLimit) {
+export class Road {
+    constructor(id, startX, startY, endX, endY, speedLimit) {
         this.id = id
-        this.intersectionA = intersectionA
-        this.intersectionB = intersectionB
+        this.start = { x: startX, y: startY }
+        this.end = { x: endX, y: endY }
         this.speedLimit = speedLimit
-
         this.length = this.calculateLength()
-
-        this.vehiclesAtoB = [];
-        this.vehiclesBtoA = [];
+        this.vehiclesAtoB = []
+        this.vehiclesBtoA = []
     }
-
+    
     calculateLength() {
-        const dx = this.intersectionB.x - this.intersectionA.x
-        const dy = this.intersectionB.y - this.intersectionA.y
+        const dx = this.end.x - this.start.x
+        const dy = this.end.y - this.start.y
         return Math.sqrt(dx * dx + dy * dy)
     }
 }

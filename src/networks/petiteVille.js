@@ -1,26 +1,23 @@
-import { Intersection } from "../simulation/Intersection";
-import { Road } from "../simulation/Road";
+import { Intersection } from '../simulation/Intersection.js'
+import { Road } from '../simulation/Road.js'
 
-export function buildPetiteVille(speedLimit) {
-    const center = new Intersection('center', 400, 300)
-    const north = new Intersection('north', 400, 100)
-    const south = new Intersection('south', 400, 500)
-    const east = new Intersection('east', 700, 300)
-    const west = new Intersection('west', 100, 300)
-
-    const intersections = [center, north, south, east, west]
-
+export function buildPetiteVille() {
+    const CENTER_X = 400
+    const CENTER_Y = 300
+    
+    const carrefour = new Intersection('carrefour', CENTER_X, CENTER_Y)
+    
     const roads = [
-        new Road('r-n', center, north, speedLimit),
-        new Road('r-s', center, south, speedLimit),
-        new Road('r-e', center, east, speedLimit),
-        new Road('r-w', center, west, speedLimit)
+        new Road('route-nord',  CENTER_X, 50,  CENTER_X, CENTER_Y, 50),
+        new Road('route-sud',   CENTER_X, 550, CENTER_X, CENTER_Y, 50),
+        new Road('route-est',   750, CENTER_Y, CENTER_X, CENTER_Y, 50),
+        new Road('route-ouest', 50,  CENTER_Y, CENTER_X, CENTER_Y, 50)
     ]
-
-    roads.forEach(road => {
-        road.intersectionA.addRoad(road)
-        road.intersectionB.addRoad(road)
-    })
-
-    return {intersections, roads}
+    
+    roads.forEach(road => carrefour.addRoad(road))
+    
+    return { 
+        intersections: [carrefour],
+        roads 
+    }
 }
