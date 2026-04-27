@@ -1,11 +1,14 @@
 const ROAD_WIDTH = 100
+const VEHICLE_RADIUS = 6
 
-export function render(ctx, network) {
+export function render(ctx, network, vehicles = []) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     
     network.roads.forEach(road => drawRoad(ctx, road))
     
     network.intersections.forEach(intersection => drawIntersection(ctx, intersection))
+
+    vehicles.forEach(vehicle => drawVehicle(ctx, vehicle))
 }
 
 function drawRoad(ctx, road) {
@@ -35,4 +38,13 @@ function drawIntersection(ctx, intersection) {
         ROAD_WIDTH,
         ROAD_WIDTH
     )
+}
+
+function drawVehicle(ctx, vehicle) {
+    const { x, y } = vehicle.getScreenPosition()
+    
+    ctx.fillStyle = '#e63946'
+    ctx.beginPath()
+    ctx.arc(x, y, VEHICLE_RADIUS, 0, Math.PI * 2)
+    ctx.fill()
 }
