@@ -19,9 +19,11 @@ export class Simulation{
     }
 
     step(deltaTime){
+        this.network.intersections.forEach(intersection => intersection.update(deltaTime))
+
         this.spawnTimer += deltaTime
         if(this.spawnTimer >= this.spawnInterval){
-            this.spawnTimer = 0
+            this.spawnTimer -= this.spawnInterval
             this.spawnVehicle()
         }
 
@@ -39,8 +41,7 @@ export class Simulation{
             else {
                 survivors.push(vehicle)
             }
-
-            this.vehicles = survivors
         });
+        this.vehicles = survivors
     }
 }

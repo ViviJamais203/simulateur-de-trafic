@@ -6,7 +6,7 @@ export function buildPetiteVille() {
     const CENTER_Y = 300
     const INTERSECTION_SIZE = 100
     
-    const carrefour = new Intersection('carrefour', CENTER_X, CENTER_Y)
+    const intersection = new Intersection('carrefour', CENTER_X, CENTER_Y)
     
     const roads = [
         new Road('route-nord',  CENTER_X, 50,  CENTER_X, CENTER_Y - INTERSECTION_SIZE / 2, 50),
@@ -15,10 +15,11 @@ export function buildPetiteVille() {
         new Road('route-ouest', 50,  CENTER_Y, CENTER_X - INTERSECTION_SIZE / 2, CENTER_Y, 50)
     ]
     
-    roads.forEach(road => carrefour.addRoad(road))
+    roads.forEach(road => intersection.addRoad(road))
+    intersection.initTrafficLights()
     
     return { 
-        intersections: [carrefour],
+        intersections: [intersection],
         roads 
     }
 }
