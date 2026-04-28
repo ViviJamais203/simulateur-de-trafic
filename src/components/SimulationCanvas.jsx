@@ -26,7 +26,7 @@ export function SimulationCanvas() {
 
             rafId = requestAnimationFrame(loop)
         }
-        
+
         rafId = requestAnimationFrame(loop)
 
         return () => cancelAnimationFrame(rafId)
