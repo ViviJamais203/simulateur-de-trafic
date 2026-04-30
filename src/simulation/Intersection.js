@@ -14,6 +14,7 @@ export class Intersection {
     
     addRoad(road) {
         this.roads.push(road)
+        road.endIntersection = this
     }
 
     initTrafficLights() {

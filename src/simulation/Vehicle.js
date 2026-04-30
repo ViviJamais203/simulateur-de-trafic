@@ -17,7 +17,8 @@ export class Vehicle {
 
     update(deltaTime) {
         if (this.state == 'on_road') {
-            this.progress += this.speed * deltaTime
+            const speedFactor = this.computeSpeedFactor()
+            this.progress += this.speed * speedFactor * deltaTime
         } else if (this.state == 'crossing') {
             this.crossing.progress += this.speed * deltaTime
 
@@ -26,10 +27,51 @@ export class Vehicle {
                 this.direction = this.crossing.nextDirection
                 this.progress = 0
                 this.state = 'on_road'
-                this.road.vehiclesBtoA.push(this)
+                if (this.direction == 'AtoB') {
+                    this.road.vehiclesAtoB.push(this)
+                } else {
+                    this.road.vehiclesBtoA.push(this)
+                }
                 this.crossing = null
             }
         }
+    }
+
+    // Calcule un coefficient entre 0 (arrêt complet) et 1 (vitesse nominale)
+    // en fonction du véhicule devant et de l'éventuel feu rouge à la fin de la route.
+    computeSpeedFactor() {
+        const SAFE_DISTANCE = 20
+        const BRAKING_DISTANCE = 60
+
+        let blockingDistance = Infinity
+
+        const ahead = this.road.getVehicleAhead(this)
+        if (ahead) {
+            blockingDistance = Math.min(blockingDistance, ahead.distance)
+        }
+
+        const lightDistance = this.getDistanceToRedLight()
+        if (lightDistance !== null) {
+            blockingDistance = Math.min(blockingDistance, lightDistance)
+        }
+
+        if (blockingDistance < SAFE_DISTANCE) return 0
+        if (blockingDistance < BRAKING_DISTANCE) {
+            return (blockingDistance - SAFE_DISTANCE) / (BRAKING_DISTANCE - SAFE_DISTANCE)
+        }
+        return 1
+    }
+
+    // Retourne la distance jusqu'au feu rouge à la fin de la route,
+    // ou null si pas de feu / feu vert / pas de feu sur cette route.
+    // Le feu n'arrête que les véhicules qui vont vers l'intersection (AtoB).
+    getDistanceToRedLight() {
+        if (this.direction !== 'AtoB') return null
+        const intersection = this.road.endIntersection
+        if (!intersection) return null
+        const light = intersection.getLightForRoad(this.road)
+        if (!light || light.isGreen()) return null
+        return this.road.length - this.progress
     }
 
     hasReachedEnd() {
@@ -41,7 +83,6 @@ export class Vehicle {
         if (this.state == 'crossing') {
             const c = this.crossing
             const t = c.progress / c.arcLength
-            const currentAngle = c.startAngle + c.delta * t
 
             if (c.isStraight) {
                 return {
@@ -49,6 +90,7 @@ export class Vehicle {
                     y: c.startY + (c.endY - c.startY) * t
                 }
             } else {
+                const currentAngle = c.startAngle + c.delta * t
                 return {
                     x: c.cx + c.radius * Math.cos(currentAngle),
                     y: c.cy + c.radius * Math.sin(currentAngle)

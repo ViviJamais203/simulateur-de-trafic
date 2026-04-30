@@ -4,18 +4,22 @@ export class Simulation{
     constructor(network){
         this.network = network
         this.vehicles = []
+        this.vehicleSpawned = 0
         this.nextVehicleId = 0
         this.spawnTimer = 0
         this.spawnInterval = 2
     }
 
     spawnVehicle(){
+        if (this.vehicleSpawned >= 45)
+            return
         const roads = this.network.roads
         const road = roads[Math.floor(Math.random() * roads.length)]
 
         const speed = 50
         const vehicle = new Vehicle(this.nextVehicleId++, road, 'AtoB', speed)
         this.vehicles.push(vehicle)
+        this.vehicleSpawned++
     }
 
     step(deltaTime){
@@ -32,7 +36,7 @@ export class Simulation{
             vehicle.update(deltaTime)
 
             if (vehicle.hasReachedEnd()) {
-                const intersection = this.network.intersections[0]
+                const intersection = vehicle.road.endIntersection
                 const stillAlive = vehicle.handleEndOfRoad(intersection)
                 if (stillAlive) {
                     survivors.push(vehicle)
