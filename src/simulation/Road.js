@@ -7,6 +7,11 @@ export class Road {
         this.length = this.calculateLength()
         this.vehiclesAtoB = []
         this.vehiclesBtoA = []
+        this.maxVehicles = Math.floor(this.length / 30)
+    }
+
+    isFull() {
+        return (this.vehiclesAtoB.length + this.vehiclesBtoA.length) >= this.maxVehicles
     }
     
     calculateLength() {

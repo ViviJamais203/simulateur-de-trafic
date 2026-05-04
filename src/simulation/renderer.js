@@ -31,33 +31,49 @@ function drawRoad(ctx, road) {
 }
 
 function drawIntersection(ctx, intersection) {
-    ctx.fillStyle = '#1f2937'
-    ctx.fillRect(
-        intersection.x - ROAD_WIDTH / 2,
-        intersection.y - ROAD_WIDTH / 2,
-        ROAD_WIDTH,
-        ROAD_WIDTH
-    )
+    if (intersection.shape === 'hexagon') {
+        drawHexagon(ctx, intersection)
+    } else {
+        ctx.fillStyle = '#1f2937'
+        ctx.fillRect(
+            intersection.x - ROAD_WIDTH / 2,
+            intersection.y - ROAD_WIDTH / 2,
+            ROAD_WIDTH,
+            ROAD_WIDTH
+        )
+    }
 
     intersection.lights.forEach(light => drawTrafficLight(ctx, light, intersection))
+}
+
+function drawHexagon(ctx, intersection) {
+    const R = intersection.shapeRadius
+    ctx.fillStyle = '#1f2937'
+    ctx.beginPath()
+    for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 6) + (Math.PI / 3) * i
+        const vx = intersection.x + R * Math.cos(angle)
+        const vy = intersection.y + R * Math.sin(angle)
+        if (i === 0) ctx.moveTo(vx, vy)
+        else ctx.lineTo(vx, vy)
+    }
+    ctx.closePath()
+    ctx.fill()
 }
 
 function drawTrafficLight(ctx, light, intersection) {
     const road = light.road
 
-    // Direction unitaire de la route, depuis l'extrémité extérieure vers l'intersection
     const dx = intersection.x - road.start.x
     const dy = intersection.y - road.start.y
     const length = Math.sqrt(dx * dx + dy * dy)
     const ux = dx / length
     const uy = dy / length
 
-    // Point d'arrêt : à l'entrée de l'intersection (on recule depuis le centre)
-    const stopX = intersection.x - ux * (ROAD_WIDTH / 2)
-    const stopY = intersection.y - uy * (ROAD_WIDTH / 2)
+    // Place the light at the road endpoint (hexagon edge or square edge)
+    const stopX = road.end.x
+    const stopY = road.end.y
 
-    // Décalage perpendiculaire vers le bord extérieur de la voie entrante.
-    // Demi-largeur de route + marge, pour que le feu soit posé sur le « trottoir ».
     const perpX = -uy
     const perpY = ux
     const sideOffset = ROAD_WIDTH / 2 + LIGHT_EDGE_MARGIN
@@ -76,7 +92,7 @@ function drawTrafficLight(ctx, light, intersection) {
 
 function drawVehicle(ctx, vehicle) {
     const { x, y } = vehicle.getScreenPosition()
-    
+
     ctx.fillStyle = '#00ffff'
     ctx.beginPath()
     ctx.arc(x, y, VEHICLE_RADIUS, 0, Math.PI * 2)

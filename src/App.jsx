@@ -4,6 +4,7 @@ import Parametres from './pages/ParametersPage'
 import Simulation from './pages/SimulationPage'
 import NotFound from './pages/NotFoundPage'
 import './style.css'
+import './index.css'
 
 function App() {
   return (

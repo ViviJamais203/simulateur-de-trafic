@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import ParametersForm from "../components/ParametersForm"
 
@@ -18,22 +18,24 @@ export default function Parametres() {
     }
 
     return (
-        <>
-            <h1>Paramètres</h1>
-            <ParametersForm 
-                vehicleRange={vehicleRange}
-                setVehicleRange={setVehicleRange}
-                speedRange={speedRange}
-                setSpeedRange={setSpeedRange}
-                lightRange={lightRange}
-                setLightRange={setLightRange}
-                spawnRange={spawnRange}
-                setSpawnRange={setSpawnRange}
-                checkedNetwork={checkedNetwork}
-                setCheckedNetwork={setCheckedNetwork}
-                disabled={false}
-                onSubmit={handleSubmit}
-            />
-        </>
+        <div className="page">
+            <h1>Parametres</h1>
+            <div className="card">
+                <ParametersForm
+                    vehicleRange={vehicleRange}
+                    setVehicleRange={setVehicleRange}
+                    speedRange={speedRange}
+                    setSpeedRange={setSpeedRange}
+                    lightRange={lightRange}
+                    setLightRange={setLightRange}
+                    spawnRange={spawnRange}
+                    setSpawnRange={setSpawnRange}
+                    checkedNetwork={checkedNetwork}
+                    setCheckedNetwork={setCheckedNetwork}
+                    disabled={false}
+                    onSubmit={handleSubmit}
+                />
+            </div>
+        </div>
     )
 }

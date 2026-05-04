@@ -7,45 +7,52 @@ export default function ParametersForm({
     disabled, onSubmit }) {
 
     return (
-        <form onSubmit={onSubmit}>
+        <form className="params-form" onSubmit={onSubmit}>
             <fieldset>
-                <legend>Paramètres du trafic</legend>
-                <section>
-                    <label htmlFor="vehicles">Nombre de véhicules</label>
-                    <input id="VehicleInput" name="vehicles" value={vehicleRange} onChange={(e) => setVehicleRange(e.target.value)} type="range" min="5" max="200" step="5" disabled={disabled}/>
-                    <p id="VehicleNumber">{vehicleRange}</p>
-                </section>
+                <legend>Parametres du trafic</legend>
 
-                <section>
+                <div className="param-row">
+                    <label htmlFor="vehicles">Nombre de vehicules</label>
+                    <input id="vehicles" name="vehicles" value={vehicleRange} onChange={(e) => setVehicleRange(e.target.value)} type="range" min="5" max="200" step="5" disabled={disabled}/>
+                    <span className="param-value">{vehicleRange}</span>
+                </div>
+
+                <div className="param-row">
                     <label htmlFor="speed">Vitesse maximale</label>
-                    <input id="SpeedInput" name="speed" value={speedRange} onChange={(e) => setSpeedRange(e.target.value)} type="range" min="40" max="120" step="1" disabled={disabled} />
-                    <p id="MaxSpeed">{speedRange}</p>
-                </section>
+                    <input id="speed" name="speed" value={speedRange} onChange={(e) => setSpeedRange(e.target.value)} type="range" min="40" max="120" step="1" disabled={disabled} />
+                    <span className="param-value">{speedRange}</span>
+                </div>
 
-                <section>
+                <div className="param-row">
                     <label htmlFor="lights">Cycle des feux</label>
-                    <input id="LightInput" name="lights" value={lightRange} onChange={(e) => setLightRange(e.target.value)} type="range" min="8" max="30" step="1" disabled={disabled} />
-                    <p id="LightCycle">{lightRange}</p>
-                </section>
+                    <input id="lights" name="lights" value={lightRange} onChange={(e) => setLightRange(e.target.value)} type="range" min="8" max="30" step="1" disabled={disabled} />
+                    <span className="param-value">{lightRange}</span>
+                </div>
 
-                <section>
-                    <label htmlFor="spawns">Taux d'apparition des véhicules</label>
-                    <input id="SpawnInput" name="spawns" value={spawnRange} onChange={(e) => setSpawnRange(e.target.value)} type="range" min="1" max="5" step="0.5" disabled={disabled} />
-                    <p id="SpawnRate">{spawnRange}</p>
-                </section>
+                <div className="param-row">
+                    <label htmlFor="spawns">Taux d'apparition</label>
+                    <input id="spawns" name="spawns" value={spawnRange} onChange={(e) => setSpawnRange(e.target.value)} type="range" min="1" max="5" step="0.5" disabled={disabled} />
+                    <span className="param-value">{spawnRange}</span>
+                </div>
             </fieldset>
 
             <fieldset>
-                <legend>Réseau routier</legend>
-                <section>
-                    <input name="network" type="radio" value="option1" checked={checkedNetwork == "option1"} onChange={(e) => setCheckedNetwork(e.target.value)} disabled={disabled} />
-                </section>
-                <section>
-                    <input name="network" type="radio" value="option2" checked={checkedNetwork == "option2"} onChange={(e) => setCheckedNetwork(e.target.value)} disabled={disabled} />
-                </section>
+                <legend>Reseau routier</legend>
+                <div className="radio-group">
+                    <div className="radio-option">
+                        <input id="net-1" name="network" type="radio" value="option1" checked={checkedNetwork == "option1"} onChange={(e) => setCheckedNetwork(e.target.value)} disabled={disabled} />
+                        <label htmlFor="net-1" className="radio-label">Petite ville</label>
+                    </div>
+                    <div className="radio-option">
+                        <input id="net-2" name="network" type="radio" value="option2" checked={checkedNetwork == "option2"} onChange={(e) => setCheckedNetwork(e.target.value)} disabled={disabled} />
+                        <label htmlFor="net-2" className="radio-label">Carrefour de la mort</label>
+                    </div>
+                </div>
             </fieldset>
 
-            <button type="submit">Lancer la simulation</button>
+            {!disabled && (
+                <button className="btn-primary" type="submit">Lancer la simulation</button>
+            )}
         </form>
     )
 }
