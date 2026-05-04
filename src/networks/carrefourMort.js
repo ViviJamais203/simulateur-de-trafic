@@ -1,12 +1,12 @@
 import { Road } from "../simulation/Road"
 import { Intersection } from "../simulation/Intersection"
 
-export function buildCarrefourMort() {
+export function buildCarrefourMort(lightCycle) {
     const CENTER_X = 400
     const CENTER_Y = 300
     const ROAD_LENGTH = 280
     
-    const carrefour = new Intersection('carrefour', CENTER_X, CENTER_Y)
+    const carrefour = new Intersection('carrefour', CENTER_X, CENTER_Y, lightCycle)
     
     const roads = []
     for (let i = 0; i < 6; i++) {

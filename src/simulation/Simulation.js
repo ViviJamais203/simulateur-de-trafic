@@ -1,23 +1,26 @@
 import { Vehicle } from "./Vehicle";
 
 export class Simulation{
-    constructor(network){
+    constructor(network, spawnLimit, spawnInterval, maxSpeed){
         this.network = network
         this.vehicles = []
         this.vehicleSpawned = 0
         this.nextVehicleId = 0
+        this.spawnLimit = spawnLimit
         this.spawnTimer = 0
-        this.spawnInterval = 2
+        this.spawnInterval = spawnInterval
+        this.maxSpeed = maxSpeed
     }
 
     spawnVehicle(){
-        if (this.vehicleSpawned >= 45)
+        if (this.vehicleSpawned >= this.spawnLimit) {
+            console.log(this.vehicleSpawned + "/" + this.spawnLimit)
             return
+        }
         const roads = this.network.roads
         const road = roads[Math.floor(Math.random() * roads.length)]
 
-        const speed = 50
-        const vehicle = new Vehicle(this.nextVehicleId++, road, 'AtoB', speed)
+        const vehicle = new Vehicle(this.nextVehicleId++, road, 'AtoB', this.maxSpeed)
         this.vehicles.push(vehicle)
         this.vehicleSpawned++
     }

@@ -4,15 +4,21 @@ import { buildCarrefourMort } from "../networks/carrefourMort.js";
 import { Simulation } from '../simulation/Simulation.js'
 import { render } from '../simulation/renderer.js'
 
-export function SimulationCanvas() {
+export function SimulationCanvas({
+    checkedNetwork, 
+    vehicleRange, 
+    speedRange, 
+    lightRange,
+    spawnRange }) {
+
     const canvasRef = useRef(null)
 
     useEffect(() => {
         const canvas = canvasRef.current
         const ctx = canvas.getContext('2d')
 
-        const network = buildPetiteVille()
-        const simulation = new Simulation(network)
+        const network = checkedNetwork == "option1" ? buildPetiteVille(lightRange) : buildCarrefourMort(lightRange)
+        const simulation = new Simulation(network, vehicleRange, spawnRange, speedRange)
 
         let lastTime = performance.now()
         let rafId

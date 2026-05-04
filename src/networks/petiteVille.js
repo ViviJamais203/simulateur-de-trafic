@@ -1,12 +1,12 @@
 import { Intersection } from '../simulation/Intersection.js'
 import { Road } from '../simulation/Road.js'
 
-export function buildPetiteVille() {
+export function buildPetiteVille(lightCycle) {
     const CENTER_X = 400
     const CENTER_Y = 300
     const INTERSECTION_SIZE = 100
     
-    const intersection = new Intersection('carrefour', CENTER_X, CENTER_Y)
+    const intersection = new Intersection('carrefour', CENTER_X, CENTER_Y, lightCycle)
     
     const roads = [
         new Road('route-nord',  CENTER_X, 50,  CENTER_X, CENTER_Y - INTERSECTION_SIZE / 2, 50),

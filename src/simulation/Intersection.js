@@ -1,7 +1,7 @@
 import { TrafficLight } from "./TrafficLight"
 
 export class Intersection {
-    constructor(id, x, y, cycleDuration = 5) {
+    constructor(id, x, y, cycleDuration) {
         this.id = id
         this.x = x
         this.y = y
