@@ -34,7 +34,7 @@ export default function Simulation() {
             <div className="simulation-header">
                 <h1>Simulation</h1>
                 <button className="btn-back" onClick={() => navigate("/parametres", { state: location.state })}>
-                    Parametres
+                    Paramètres
                 </button>
             </div>
             <div className="simulation-layout">
