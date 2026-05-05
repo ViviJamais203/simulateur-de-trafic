@@ -1,0 +1,21 @@
+stages:
+  - sync
+
+sync_to_github:
+  stage: sync
+  variables:
+    GIT_DEPTH: 0
+  only:
+    - main
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git
+  script:
+    - git config --global user.email "ci@gitlab.com"
+    - git config --global user.name "GitLab CI"
+
+    # Ajouter GitHub
+    - git remote add github https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com/$GITHUB_USERNAME/simulateur-de-trafic.git
+
+    # Push vers GitHub
+    - git push github HEAD:main --force

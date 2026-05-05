@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite *)",
+      "Bash(git restore *)",
+      "Bash(ls D:/simulateur-de-trafic/src/*.css)"
+    ]
+  }
+}
