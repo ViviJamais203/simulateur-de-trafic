@@ -15,7 +15,8 @@ export class Simulation {
         this.allRoadsBlocked = false
         this.statisticsTimer = 0
         this.statisticsInterval = 0.5
-        this.statistics = { activeVehicles: 0, averageSpeed: 0 }
+        this.congestionZones = new Map()
+        this.statistics = { activeVehicles: 0, averageSpeed: 0, congestionZones: [] }
     }
 
     spawnVehicle() {
@@ -70,6 +71,8 @@ export class Simulation {
             this.handleSimulationFinished()
         }
 
+        this.updateCongestionZones(deltaTime)
+
         this.statisticsTimer += deltaTime
         if (this.statisticsTimer >= this.statisticsInterval){
             this.statisticsTimer = 0
@@ -77,17 +80,52 @@ export class Simulation {
         }
     }
 
+    updateCongestionZones(deltaTime) {
+        const threshold = this.maxSpeed * 0.15
+
+        this.network.roads.forEach(road => {
+            for (const direction of ['AtoB', 'BtoA']) {
+                const key = `${road.id}-${direction}`
+                const list = direction === 'AtoB' ? road.vehiclesAtoB : road.vehiclesBtoA
+                const stopped = list.filter(v => v.state === 'on_road' && v.currentSpeed < threshold)
+
+                if (stopped.length >= 2) {
+                    const progresses = stopped.map(v => v.progress)
+                    const minProgress = Math.min(...progresses)
+                    const maxProgress = Math.max(...progresses)
+
+                    if (this.congestionZones.has(key)) {
+                        const zone = this.congestionZones.get(key)
+                        zone.duration += deltaTime
+                        zone.minProgress = minProgress
+                        zone.maxProgress = maxProgress
+                    } else {
+                        this.congestionZones.set(key, { road, direction, duration: 0, minProgress, maxProgress })
+                    }
+                } else {
+                    this.congestionZones.delete(key)
+                }
+            }
+        })
+    }
+
     updateStatistics() {
         let totalSpeed = 0
         this.vehicles.forEach(vehicle => totalSpeed += vehicle.currentSpeed)
 
-        console.log("vehicles.length:", this.vehicles.length, "| totalSpeed:", totalSpeed)
 
         const averageSpeed = this.vehicles.length > 0
             ? Math.round(totalSpeed / this.vehicles.length * 100) / 100
             : 0
-        this.statistics = { activeVehicles: this.vehicles.length, averageSpeed }
-        console.log(this.statistics)
+        const congestionZones = Array.from(this.congestionZones.values()).map(z => {
+            const mid = (z.minProgress + z.maxProgress) / 2
+            const t = mid / z.road.length
+            const centerX = z.road.start.x + (z.road.end.x - z.road.start.x) * t
+            const centerY = z.road.start.y + (z.road.end.y - z.road.start.y) * t
+            return { roadId: z.road.id, direction: z.direction, duration: z.duration, centerX, centerY }
+        })
+
+        this.statistics = { activeVehicles: this.vehicles.length, averageSpeed, congestionZones }
         return this.statistics
     }
 

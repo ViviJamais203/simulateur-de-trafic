@@ -3,10 +3,11 @@ const VEHICLE_RADIUS = 6
 const LIGHT_RADIUS = 8
 const LIGHT_EDGE_MARGIN = 8
 
-export function render(ctx, network, vehicles = []) {
+export function render(ctx, network, vehicles = [], congestionZones = new Map()) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
     network.roads.forEach(road => drawRoad(ctx, road))
+    congestionZones.forEach(zone => drawCongestionZone(ctx, zone))
     network.intersections.forEach(intersection => drawIntersection(ctx, intersection))
     vehicles.forEach(vehicle => drawVehicle(ctx, vehicle))
 }
@@ -88,6 +89,38 @@ function drawTrafficLight(ctx, light, intersection) {
     ctx.strokeStyle = '#000000'
     ctx.lineWidth = 1.5
     ctx.stroke()
+}
+
+const LANE_OFFSET = 25
+
+function drawCongestionZone(ctx, zone) {
+    const { road, direction, minProgress, maxProgress } = zone
+    const { start, end } = road
+    const len = road.length
+
+    const dxN = (end.x - start.x) / len
+    const dyN = (end.y - start.y) / len
+    const perpX = -dyN
+    const perpY = dxN
+    const sign = direction === 'AtoB' ? 1 : -1
+
+    const t1 = minProgress / len
+    const t2 = maxProgress / len
+
+    const x1 = start.x + (end.x - start.x) * t1 + perpX * LANE_OFFSET * sign
+    const y1 = start.y + (end.y - start.y) * t1 + perpY * LANE_OFFSET * sign
+    const x2 = start.x + (end.x - start.x) * t2 + perpX * LANE_OFFSET * sign
+    const y2 = start.y + (end.y - start.y) * t2 + perpY * LANE_OFFSET * sign
+
+    ctx.save()
+    ctx.strokeStyle = 'rgba(255, 120, 0, 0.4)'
+    ctx.lineWidth = ROAD_WIDTH / 2 - 6
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.stroke()
+    ctx.restore()
 }
 
 function drawVehicle(ctx, vehicle) {

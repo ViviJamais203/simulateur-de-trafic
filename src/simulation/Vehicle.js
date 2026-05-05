@@ -240,9 +240,20 @@ function computeLaneEntryPoint(road, direction) {
 }
 
 function computeArcCenter(p1, dir1, p2, dir2) {
-    if (Math.abs(dir1.x) < 0.01) {
-        return { x: p2.x, y: p1.y }
-    } else {
-        return { x: p1.x, y: p2.y }
+    const perp1 = { x: -dir1.y, y: dir1.x }
+    const perp2 = { x: -dir2.y, y: dir2.x }
+
+    const dx = p2.x - p1.x
+    const dy = p2.y - p1.y
+
+    // det = 0 when perp1 et perp2 sont parallèles (cas droit, déjà filtré)
+    const det = perp2.x * perp1.y - perp1.x * perp2.y
+    if (Math.abs(det) < 0.001) return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }
+
+    const t = (-dx * perp2.y + perp2.x * dy) / det
+
+    return {
+        x: p1.x + t * perp1.x,
+        y: p1.y + t * perp1.y
     }
 }

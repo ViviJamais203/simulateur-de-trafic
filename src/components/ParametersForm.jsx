@@ -1,3 +1,6 @@
+import petiteVille from '../../assets/petiteVille.png'
+import carrefourMort from '../../assets/carrefourMort.png'
+
 export default function ParametersForm({
     vehicleRange, setVehicleRange,
     speedRange, setSpeedRange,
@@ -38,14 +41,20 @@ export default function ParametersForm({
 
             <fieldset>
                 <legend>Reseau routier</legend>
-                <div className="radio-group">
+                <div className="radio-group network-radio-group">
                     <div className="radio-option">
                         <input id="net-1" name="network" type="radio" value="option1" checked={checkedNetwork == "option1"} onChange={(e) => setCheckedNetwork(e.target.value)} disabled={disabled} />
-                        <label htmlFor="net-1" className="radio-label">Petite ville</label>
+                        <label htmlFor="net-1" className="radio-label network-label">
+                            <img src={petiteVille} alt="Petite ville" className="network-preview" />
+                            Petite ville
+                        </label>
                     </div>
                     <div className="radio-option">
                         <input id="net-2" name="network" type="radio" value="option2" checked={checkedNetwork == "option2"} onChange={(e) => setCheckedNetwork(e.target.value)} disabled={disabled} />
-                        <label htmlFor="net-2" className="radio-label">Carrefour de la mort</label>
+                        <label htmlFor="net-2" className="radio-label network-label">
+                            <img src={carrefourMort} alt="Carrefour de la mort" className="network-preview" />
+                            Carrefour de la mort
+                        </label>
                     </div>
                 </div>
             </fieldset>

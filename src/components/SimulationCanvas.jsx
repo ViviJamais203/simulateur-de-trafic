@@ -45,7 +45,7 @@ export function SimulationCanvas({
             const deltaTime = (currentTime - lastTime) / 1000
             lastTime = currentTime
             simulation.step(deltaTime * speedRef.current)
-            render(ctx, network, simulation.vehicles)
+            render(ctx, network, simulation.vehicles, simulation.congestionZones)
             if (simulation.allRoadsBlocked !== wasBlocked) {
                 wasBlocked = simulation.allRoadsBlocked
                 onRoadsBlockedRef.current?.(wasBlocked)

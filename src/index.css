@@ -159,6 +159,25 @@
   cursor: not-allowed;
 }
 
+.network-radio-group {
+  gap: var(--spacing-sm);
+}
+
+.network-label {
+  display: flex !important;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) !important;
+}
+
+.network-preview {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
 .params-form .btn-primary {
   margin-top: var(--spacing-md);
   width: 100%;
@@ -360,6 +379,43 @@
   color: var(--color-primary);
   font-variant-numeric: tabular-nums;
   line-height: 1;
+}
+
+.stat-no-congestion {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
+}
+
+.congestion-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.congestion-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.congestion-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 120, 0, 0.85);
+  flex-shrink: 0;
+}
+
+.congestion-duration {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--color-warning);
 }
 
 .stat-unit {
