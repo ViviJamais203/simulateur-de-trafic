@@ -5,6 +5,7 @@ export class Vehicle {
         this.direction = direction
         this.progress = 0
         this.speed = speed
+        this.currentSpeed = speed
         this.state = 'on_road'
         this.crossing = null
 
@@ -18,8 +19,10 @@ export class Vehicle {
     update(deltaTime) {
         if (this.state == 'on_road') {
             const speedFactor = this.computeSpeedFactor()
-            this.progress += this.speed * speedFactor * deltaTime
+            this.currentSpeed = this.speed * speedFactor
+            this.progress += this.currentSpeed * deltaTime
         } else if (this.state == 'crossing') {
+            this.currentSpeed = this.speed
             this.crossing.progress += this.speed * deltaTime
 
             if (this.crossing.progress >= this.crossing.arcLength) {
@@ -37,8 +40,6 @@ export class Vehicle {
         }
     }
 
-    // Calcule un coefficient entre 0 (arrêt complet) et 1 (vitesse nominale)
-    // en fonction du véhicule devant et de l'éventuel feu rouge à la fin de la route.
     computeSpeedFactor() {
         const SAFE_DISTANCE = 20
         const BRAKING_DISTANCE = 60
@@ -62,9 +63,6 @@ export class Vehicle {
         return 1
     }
 
-    // Retourne la distance jusqu'au feu rouge à la fin de la route,
-    // ou null si pas de feu / feu vert / pas de feu sur cette route.
-    // Le feu n'arrête que les véhicules qui vont vers l'intersection (AtoB).
     getDistanceToRedLight() {
         if (this.direction !== 'AtoB') return null
         const intersection = this.road.endIntersection
@@ -77,7 +75,6 @@ export class Vehicle {
     hasReachedEnd() {
         return this.state == 'on_road' && this.progress >= this.road.length
     }
-
 
     getScreenPosition() {
         if (this.state == 'crossing') {
@@ -199,7 +196,6 @@ export class Vehicle {
             return false
         }
     }
-
 }
 
 function getMarchDirection(road, direction) {

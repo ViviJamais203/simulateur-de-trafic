@@ -8,8 +8,11 @@ export class Intersection {
         this.roads = []
         this.lights = []
         this.cycleDuration = cycleDuration
-        this.currentGreenIndex  = 0
+        this.currentGreenIndex = 0
         this.elapsedTime = 0
+        this.inTransition = false
+        this.transitionTimer = 0
+        this.transitionDuration = 1
     }
     
     addRoad(road) {
@@ -27,12 +30,24 @@ export class Intersection {
 
     update(deltaTime) {
         if (this.lights.length == 0) return
+
+        if (this.inTransition) {
+            this.transitionTimer += deltaTime
+            if (this.transitionTimer >= this.transitionDuration) {
+                this.inTransition = false
+                this.transitionTimer = 0
+                this.lights[this.currentGreenIndex].setGreen()
+            }
+            return
+        }
+
         this.elapsedTime += deltaTime
         if (this.elapsedTime >= this.cycleDuration) {
             this.elapsedTime -= this.cycleDuration
             this.lights[this.currentGreenIndex].setRed()
             this.currentGreenIndex = (this.currentGreenIndex + 1) % this.lights.length
-            this.lights[this.currentGreenIndex].setGreen()
+            this.inTransition = true
+            this.transitionTimer = 0
         }
     }
 
