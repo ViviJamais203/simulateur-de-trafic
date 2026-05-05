@@ -19,7 +19,7 @@ export default function Parametres() {
 
     return (
         <div className="page">
-            <h1>Parametres</h1>
+            <h1>Paramètres</h1>
             <div className="card">
                 <ParametersForm
                     vehicleRange={vehicleRange}
