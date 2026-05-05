@@ -35,7 +35,7 @@ export default function ParametersForm({
                 <div className="param-row">
                     <label htmlFor="spawns">Taux d'apparition</label>
                     <input id="spawns" name="spawns" value={spawnRange} onChange={(e) => setSpawnRange(e.target.value)} type="range" min="1" max="5" step="0.5" disabled={disabled} />
-                    <span className="param-value">{spawnRange} <span className="param-unit">véh./s</span></span>
+                    <span className="param-value"><span className="param-unit">1 véh./ </span>{spawnRange} <span className="param-unit">s</span></span>
                 </div>
             </fieldset>
 
