@@ -111,12 +111,20 @@
 }
 
 .param-value {
-  flex: 0 0 48px;
-  text-align: right;
+  flex: 0 0 auto;
+  min-width: 82px;
+  text-align: left;
+  white-space: nowrap;
   font-weight: 600;
   font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
   color: var(--color-text);
+}
+
+.param-unit {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #888);
 }
 
 /* Radio group */
@@ -255,7 +263,8 @@
 }
 
 .simulation-sidebar .params-form .param-value {
-  flex: 0 0 36px;
+  flex: 0 0 auto;
+  min-width: 82px;
   font-size: 0.85rem;
 }
 
