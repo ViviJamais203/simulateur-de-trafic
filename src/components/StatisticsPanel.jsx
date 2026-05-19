@@ -1,7 +1,21 @@
+/**
+ * @module StatisticsPanel
+ * @description Composant React affichant les statistiques en temps réel de la simulation.
+ */
+
 const CANVAS_W = 800
 const CANVAS_H = 600
 const DIRECTIONS = ['Est', 'Nord-Est', 'Nord', 'Nord-Ouest', 'Ouest', 'Sud-Ouest', 'Sud', 'Sud-Est']
 
+/**
+ * Convertit des coordonnées canvas en direction cardinale textuelle (8 directions).
+ * Calcule l'angle depuis le centre du canvas (400, 300) vers le point donné,
+ * en inversant l'axe Y pour correspondre aux conventions géographiques (Nord = haut).
+ * @param {number} centerX - Coordonnée X du point sur le canvas.
+ * @param {number} centerY - Coordonnée Y du point sur le canvas.
+ * @returns {string} Direction cardinale parmi : 'Est', 'Nord-Est', 'Nord', 'Nord-Ouest',
+ *   'Ouest', 'Sud-Ouest', 'Sud', 'Sud-Est'.
+ */
 function getDirection(centerX, centerY) {
     const dx = centerX - CANVAS_W / 2
     const dy = -(centerY - CANVAS_H / 2)
@@ -10,12 +24,26 @@ function getDirection(centerX, centerY) {
     return DIRECTIONS[index]
 }
 
+/**
+ * Formate une durée en secondes en chaîne lisible par l'utilisateur.
+ * Affiche les minutes uniquement si la durée dépasse 60 secondes.
+ * @param {number} seconds - Durée en secondes.
+ * @returns {string} Chaîne formatée, ex. : `"1m 23s"` ou `"45s"`.
+ */
 function formatDuration(seconds) {
     const s = Math.floor(seconds)
     const m = Math.floor(s / 60)
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`
 }
 
+/**
+ * Composant React affichant les statistiques temps réel de la simulation :
+ * nombre de véhicules actifs, vitesse moyenne et liste des congestions actives
+ * avec leur direction cardinale et leur durée.
+ * @param {Object} props
+ * @param {{ activeVehicles: number, averageSpeed: number, congestionZones: Array<{ roadId: string, direction: string, duration: number, centerX: number, centerY: number }> }} [props.statistics] - Statistiques de la simulation.
+ * @returns {JSX.Element} Panneau de statistiques.
+ */
 export default function StatisticsPanel({ statistics }) {
     const zones = statistics?.congestionZones ?? []
 

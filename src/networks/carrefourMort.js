@@ -1,6 +1,19 @@
+/**
+ * @module carrefourMort
+ * @description Constructeur du réseau "Carrefour Mort" : une intersection hexagonale à 6 branches.
+ */
+
 import { Road } from "../simulation/Road"
 import { Intersection } from "../simulation/Intersection"
 
+/**
+ * Construit le réseau routier "Carrefour Mort" :
+ * une intersection hexagonale centrale avec 6 routes réparties régulièrement tous les 60°.
+ * Chaque route fait 280px de long et la limitation de vitesse est fixée à 50 km/h.
+ * L'extrémité interne de chaque route rejoint le bord de l'hexagone (inradius ≈ 86.6px).
+ * @param {number} lightCycle - Durée du cycle de feu vert (en secondes).
+ * @returns {{ intersections: Intersection[], roads: Road[] }} Le réseau prêt à simuler.
+ */
 export function buildCarrefourMort(lightCycle) {
     const CENTER_X = 400
     const CENTER_Y = 300

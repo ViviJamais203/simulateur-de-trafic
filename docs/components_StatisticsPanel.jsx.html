@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/StatisticsPanel.jsx</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/StatisticsPanel.jsx</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module StatisticsPanel
+ * @description Composant React affichant les statistiques en temps réel de la simulation.
+ */
+
+const CANVAS_W = 800
+const CANVAS_H = 600
+const DIRECTIONS = ['Est', 'Nord-Est', 'Nord', 'Nord-Ouest', 'Ouest', 'Sud-Ouest', 'Sud', 'Sud-Est']
+
+/**
+ * Convertit des coordonnées canvas en direction cardinale textuelle (8 directions).
+ * Calcule l'angle depuis le centre du canvas (400, 300) vers le point donné,
+ * en inversant l'axe Y pour correspondre aux conventions géographiques (Nord = haut).
+ * @param {number} centerX - Coordonnée X du point sur le canvas.
+ * @param {number} centerY - Coordonnée Y du point sur le canvas.
+ * @returns {string} Direction cardinale parmi : 'Est', 'Nord-Est', 'Nord', 'Nord-Ouest',
+ *   'Ouest', 'Sud-Ouest', 'Sud', 'Sud-Est'.
+ */
+function getDirection(centerX, centerY) {
+    const dx = centerX - CANVAS_W / 2
+    const dy = -(centerY - CANVAS_H / 2)
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI)
+    const index = Math.round(((angle % 360) + 360) / 45) % 8
+    return DIRECTIONS[index]
+}
+
+/**
+ * Formate une durée en secondes en chaîne lisible par l'utilisateur.
+ * Affiche les minutes uniquement si la durée dépasse 60 secondes.
+ * @param {number} seconds - Durée en secondes.
+ * @returns {string} Chaîne formatée, ex. : `"1m 23s"` ou `"45s"`.
+ */
+function formatDuration(seconds) {
+    const s = Math.floor(seconds)
+    const m = Math.floor(s / 60)
+    return m > 0 ? `${m}m ${s % 60}s` : `${s}s`
+}
+
+/**
+ * Composant React affichant les statistiques temps réel de la simulation :
+ * nombre de véhicules actifs, vitesse moyenne et liste des congestions actives
+ * avec leur direction cardinale et leur durée.
+ * @param {Object} props
+ * @param {{ activeVehicles: number, averageSpeed: number, congestionZones: Array&lt;{ roadId: string, direction: string, duration: number, centerX: number, centerY: number }> }} [props.statistics] - Statistiques de la simulation.
+ * @returns {JSX.Element} Panneau de statistiques.
+ */
+export default function StatisticsPanel({ statistics }) {
+    const zones = statistics?.congestionZones ?? []
+
+    return (
+        &lt;div className="statistics-panel">
+            &lt;div className="stat-card">
+                &lt;span className="stat-label">Véhicules actifs&lt;/span>
+                &lt;span className="stat-value">
+                    {statistics?.activeVehicles ?? 0}
+                    &lt;span className="stat-unit"> véh.&lt;/span>
+                &lt;/span>
+            &lt;/div>
+            &lt;div className="stat-card">
+                &lt;span className="stat-label">Vitesse moyenne&lt;/span>
+                &lt;span className="stat-value">
+                    {statistics?.averageSpeed ?? 0}
+                    &lt;span className="stat-unit"> km/h&lt;/span>
+                &lt;/span>
+            &lt;/div>
+            &lt;div className="stat-card">
+                &lt;span className="stat-label">Congestions actives&lt;/span>
+                {zones.length === 0 ? (
+                    &lt;span className="stat-no-congestion">Aucune&lt;/span>
+                ) : (
+                    &lt;ul className="congestion-list">
+                        {zones.map((zone) => (
+                            &lt;li key={`${zone.roadId}-${zone.direction}`} className="congestion-row">
+                                &lt;span className="congestion-dot" />
+                                &lt;span>{getDirection(zone.centerX, zone.centerY)}&lt;/span>
+                                &lt;span className="congestion-duration">{formatDuration(zone.duration)}&lt;/span>
+                            &lt;/li>
+                        ))}
+                    &lt;/ul>
+                )}
+            &lt;/div>
+        &lt;/div>
+    )
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Intersection.html">Intersection</a></li><li><a href="module-Road.html">Road</a></li><li><a href="module-Simulation.html">Simulation</a></li><li><a href="module-SimulationCanvas.html">SimulationCanvas</a></li><li><a href="module-StatisticsPanel.html">StatisticsPanel</a></li><li><a href="module-TrafficLight.html">TrafficLight</a></li><li><a href="module-Vehicle.html">Vehicle</a></li><li><a href="module-carrefourMort.html">carrefourMort</a></li><li><a href="module-petiteVille.html">petiteVille</a></li><li><a href="module-renderer.html">renderer</a></li></ul><h3>Classes</h3><ul><li><a href="module-Intersection.Intersection.html">Intersection</a></li><li><a href="module-Road.Road.html">Road</a></li><li><a href="module-Simulation.Simulation.html">Simulation</a></li><li><a href="module-TrafficLight.TrafficLight.html">TrafficLight</a></li><li><a href="module-Vehicle.Vehicle.html">Vehicle</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue May 19 2026 09:20:10 GMT+0200 (heure d’été d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
