@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: renderer</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: renderer</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Module de rendu 2D du simulateur sur un canvas HTML.
+Dessine les routes, les intersections, les feux de circulation,
+les zones de congestion et les véhicules.</div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".render"><span class="type-signature">(static) </span>render<span class="signature">(ctx, network, vehicles<span class="signature-attributes">opt</span>, congestionZones<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Efface le canvas et redessine l'ensemble de la scène de simulation.
+Ordre de dessin : routes → zones de congestion → intersections (avec feux) → véhicules.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CanvasRenderingContext2D</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Contexte 2D du canvas.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>network</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Le réseau routier à dessiner.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vehicles</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Vehicle></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    []
+                
+                </td>
+            
+
+            <td class="description last">Liste des véhicules actifs à dessiner.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>congestionZones</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Map.&lt;string, Object></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    new Map()
+                
+                </td>
+            
+
+            <td class="description last">Zones de congestion indexées par clé `roadId-direction`.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line21">line 21</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~drawCongestionZone"><span class="type-signature">(inner) </span>drawCongestionZone<span class="signature">(ctx, zone)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Dessine la zone de congestion d'une voie sous forme d'un segment épais
+orange semi-transparent (rgba(255, 120, 0, 0.4)).
+La zone s'étend de `minProgress` à `maxProgress` le long de la voie,
+en respectant le décalage latéral de voie (LANE_OFFSET = 25px).
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CanvasRenderingContext2D</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contexte 2D du canvas.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>zone</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">La zone de congestion à dessiner.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~drawHexagon"><span class="type-signature">(inner) </span>drawHexagon<span class="signature">(ctx, intersection)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Dessine un hexagone régulier pour représenter une intersection hexagonale.
+L'hexagone est orienté pointe en haut grâce à un décalage angulaire de `Math.PI / 6`.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CanvasRenderingContext2D</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contexte 2D du canvas.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intersection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Intersection</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'intersection dont `shapeRadius` définit le rayon.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line83">line 83</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~drawIntersection"><span class="type-signature">(inner) </span>drawIntersection<span class="signature">(ctx, intersection)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Dessine une intersection sous forme de carré ou d'hexagone selon `intersection.shape`,
+puis dessine les feux de circulation associés à chaque route connectée.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CanvasRenderingContext2D</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contexte 2D du canvas.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intersection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Intersection</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'intersection à dessiner.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line61">line 61</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~drawRoad"><span class="type-signature">(inner) </span>drawRoad<span class="signature">(ctx, road)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Dessine un tronçon routier : fond gris foncé (largeur ROAD_WIDTH = 100px)
+surmonté d'une ligne blanche centrale en pointillés (tirets 20px / espaces 20px).
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CanvasRenderingContext2D</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contexte 2D du canvas.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>road</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Road</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Le tronçon à dessiner.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line36">line 36</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~drawTrafficLight"><span class="type-signature">(inner) </span>drawTrafficLight<span class="signature">(ctx, light, intersection)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Dessine le feu de circulation d'une route à l'extrémité `end` de celle-ci,
+décalé latéralement vers l'extérieur de la chaussée (ROAD_WIDTH / 2 + LIGHT_EDGE_MARGIN).
+Couleur : vert (#22c55e) si feu vert, rouge (#ef4444) sinon.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CanvasRenderingContext2D</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contexte 2D du canvas.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>light</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">TrafficLight</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Le feu à dessiner.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>intersection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Intersection</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'intersection contenant ce feu (sert à calculer l'orientation de la route).</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line106">line 106</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~drawVehicle"><span class="type-signature">(inner) </span>drawVehicle<span class="signature">(ctx, vehicle)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Dessine un véhicule sous forme de disque cyan (#00ffff) de rayon VEHICLE_RADIUS (6px)
+à sa position actuelle sur le canvas, calculée via `vehicle.getScreenPosition()`.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CanvasRenderingContext2D</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Contexte 2D du canvas.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>vehicle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Vehicle</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Le véhicule à dessiner.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="simulation_renderer.js.html">simulation/renderer.js</a>, <a href="simulation_renderer.js.html#line181">line 181</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Intersection.html">Intersection</a></li><li><a href="module-Road.html">Road</a></li><li><a href="module-Simulation.html">Simulation</a></li><li><a href="module-SimulationCanvas.html">SimulationCanvas</a></li><li><a href="module-StatisticsPanel.html">StatisticsPanel</a></li><li><a href="module-TrafficLight.html">TrafficLight</a></li><li><a href="module-Vehicle.html">Vehicle</a></li><li><a href="module-carrefourMort.html">carrefourMort</a></li><li><a href="module-petiteVille.html">petiteVille</a></li><li><a href="module-renderer.html">renderer</a></li></ul><h3>Classes</h3><ul><li><a href="module-Intersection.Intersection.html">Intersection</a></li><li><a href="module-Road.Road.html">Road</a></li><li><a href="module-Simulation.Simulation.html">Simulation</a></li><li><a href="module-TrafficLight.TrafficLight.html">TrafficLight</a></li><li><a href="module-Vehicle.Vehicle.html">Vehicle</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue May 19 2026 09:20:10 GMT+0200 (heure d’été d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: simulation/Vehicle.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: simulation/Vehicle.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module Vehicle
+ * @description Module gérant les entités véhicules dans la simulation.
+ */
+
+/**
+ * @typedef {Object} CrossingState
+ * @property {boolean} isStraight - Indique si la traversée est en ligne droite.
+ * @property {number} progress - Progression actuelle le long de l'arc (en pixels).
+ * @property {number} arcLength - Longueur totale de l'arc à parcourir (en pixels).
+ * @property {Road} nextRoad - Route à emprunter après la traversée.
+ * @property {string} nextDirection - Direction sur la prochaine route ('AtoB' ou 'BtoA').
+ * @property {number} [startX] - Point de départ X (traversée droite uniquement).
+ * @property {number} [startY] - Point de départ Y (traversée droite uniquement).
+ * @property {number} [endX] - Point d'arrivée X (traversée droite uniquement).
+ * @property {number} [endY] - Point d'arrivée Y (traversée droite uniquement).
+ * @property {number} [cx] - Centre X de l'arc (traversée courbée uniquement).
+ * @property {number} [cy] - Centre Y de l'arc (traversée courbée uniquement).
+ * @property {number} [radius] - Rayon de l'arc (traversée courbée uniquement).
+ * @property {number} [startAngle] - Angle de départ en radians (traversée courbée uniquement).
+ * @property {number} [delta] - Variation angulaire totale en radians (traversée courbée uniquement).
+ */
+
+/**
+ * Représente un véhicule dans la simulation de trafic.
+ * Un véhicule peut être dans deux états : `on_road` (sur une route) ou `crossing` (en traversée d'intersection).
+ */
+export class Vehicle {
+    /**
+     * Crée un nouveau véhicule et l'enregistre sur sa route initiale.
+     * @param {number} id - Identifiant unique du véhicule.
+     * @param {Road} road - Route initiale sur laquelle le véhicule apparaît.
+     * @param {'AtoB'|'BtoA'} direction - Sens de circulation sur la route.
+     * @param {number} speed - Vitesse de base du véhicule (en km/h).
+     */
+    constructor(id, road, direction, speed) {
+        this.id = id
+        this.road = road
+        this.direction = direction
+        this.progress = 0
+        this.speed = speed
+        this.currentSpeed = speed
+        this.state = 'on_road'
+        this.crossing = null
+
+        if (direction == 'AtoB') {
+            road.vehiclesAtoB.push(this)
+        } else {
+            road.vehiclesBtoA.push(this)
+        }
+    }
+
+    /**
+     * Met à jour la position du véhicule pour ce pas de temps.
+     * - En état `on_road` : calcule le facteur de vitesse et avance selon `progress`.
+     * - En état `crossing` : avance à vitesse constante le long de l'arc de traversée,
+     *   puis bascule sur la prochaine route une fois l'arc terminé.
+     * @param {number} deltaTime - Temps écoulé depuis le dernier pas (en secondes).
+     */
+    update(deltaTime) {
+        if (this.state == 'on_road') {
+            const speedFactor = this.computeSpeedFactor()
+            this.currentSpeed = this.speed * speedFactor
+            this.progress += this.currentSpeed * deltaTime
+        } else if (this.state == 'crossing') {
+            this.currentSpeed = this.speed
+            this.crossing.progress += this.speed * deltaTime
+
+            if (this.crossing.progress >= this.crossing.arcLength) {
+                this.road = this.crossing.nextRoad
+                this.direction = this.crossing.nextDirection
+                this.progress = 0
+                this.state = 'on_road'
+                if (this.direction == 'AtoB') {
+                    this.road.vehiclesAtoB.push(this)
+                } else {
+                    this.road.vehiclesBtoA.push(this)
+                }
+                this.crossing = null
+            }
+        }
+    }
+
+    /**
+     * Calcule le facteur de vitesse du véhicule selon son environnement immédiat.
+     * Deux obstacles sont pris en compte : le véhicule devant et le feu rouge en bout de route.
+     *
+     * La logique de freinage suit une rampe linéaire :
+     * - Distance &lt; SAFE_DISTANCE (20px)    → facteur = 0 (arrêt complet)
+     * - Distance &lt; BRAKING_DISTANCE (60px) → facteur entre 0 et 1 (freinage progressif)
+     * - Distance ≥ BRAKING_DISTANCE        → facteur = 1 (vitesse nominale)
+     *
+     * @returns {number} Facteur de vitesse entre 0 (arrêt) et 1 (pleine vitesse).
+     */
+    computeSpeedFactor() {
+        const SAFE_DISTANCE = 20
+        const BRAKING_DISTANCE = 60
+
+        let blockingDistance = Infinity
+
+        const ahead = this.road.getVehicleAhead(this)
+        if (ahead) {
+            blockingDistance = Math.min(blockingDistance, ahead.distance)
+        }
+
+        const lightDistance = this.getDistanceToRedLight()
+        if (lightDistance !== null) {
+            blockingDistance = Math.min(blockingDistance, lightDistance)
+        }
+
+        if (blockingDistance &lt; SAFE_DISTANCE) return 0
+        if (blockingDistance &lt; BRAKING_DISTANCE) {
+            return (blockingDistance - SAFE_DISTANCE) / (BRAKING_DISTANCE - SAFE_DISTANCE)
+        }
+        return 1
+    }
+
+    /**
+     * Retourne la distance entre le véhicule et le feu rouge en bout de sa route.
+     * Ne s'applique qu'aux véhicules circulant dans le sens AtoB, car les feux
+     * sont positionnés à l'extrémité `end` des routes (endIntersection).
+     * @returns {number|null} Distance jusqu'au feu (en pixels), ou `null` si inapplicable
+     *   (sens BtoA, pas d'intersection, ou feu vert).
+     */
+    getDistanceToRedLight() {
+        if (this.direction !== 'AtoB') return null
+        const intersection = this.road.endIntersection
+        if (!intersection) return null
+        const light = intersection.getLightForRoad(this.road)
+        if (!light || light.isGreen()) return null
+        return this.road.length - this.progress
+    }
+
+    /**
+     * Vérifie si le véhicule a atteint l'extrémité de sa route courante.
+     * @returns {boolean} `true` si le véhicule est en état `on_road` et que sa progression dépasse la longueur de la route.
+     */
+    hasReachedEnd() {
+        return this.state == 'on_road' &amp;&amp; this.progress >= this.road.length
+    }
+
+    /**
+     * Calcule la position du véhicule en pixels sur le canvas.
+     * - En état `crossing` : interpolation linéaire ou angulaire le long de l'arc de traversée.
+     * - En état `on_road` : interpolation le long de la route avec un décalage latéral de voie
+     *   de 25px (LANE_OFFSET) pour séparer les deux sens de circulation.
+     * @returns {{ x: number, y: number }} Coordonnées en pixels sur le canvas.
+     */
+    getScreenPosition() {
+        if (this.state == 'crossing') {
+            const c = this.crossing
+            const t = c.progress / c.arcLength
+
+            if (c.isStraight) {
+                return {
+                    x: c.startX + (c.endX - c.startX) * t,
+                    y: c.startY + (c.endY - c.startY) * t
+                }
+            } else {
+                const currentAngle = c.startAngle + c.delta * t
+                return {
+                    x: c.cx + c.radius * Math.cos(currentAngle),
+                    y: c.cy + c.radius * Math.sin(currentAngle)
+                }
+            }
+        }
+
+        const { start, end } = this.road
+        const length = this.road.length
+
+        let t
+        if (this.direction === 'AtoB') {
+            t = this.progress / length
+        } else {
+            t = 1 - (this.progress / length)
+        }
+
+        const centerX = start.x + (end.x - start.x) * t
+        const centerY = start.y + (end.y - start.y) * t
+
+        const dx = (end.x - start.x) / length
+        const dy = (end.y - start.y) / length
+
+        const perpX = -dy
+        const perpY = dx
+
+        const LANE_OFFSET = 25
+        const sign = this.direction == 'AtoB' ? 1 : -1
+
+        const x = centerX + perpX * LANE_OFFSET * sign
+        const y = centerY + perpY * LANE_OFFSET * sign
+
+        return { x, y }
+    }
+
+    /**
+     * Gère le comportement du véhicule lorsqu'il atteint l'extrémité d'une route.
+     * - Sens AtoB : retire le véhicule de la route courante, sélectionne aléatoirement
+     *   une route adjacente via l'intersection, puis initie une traversée d'intersection
+     *   (droite si les routes sont colinéaires, courbée sinon).
+     * - Sens BtoA : retire le véhicule du réseau (il a quitté le territoire simulé).
+     * @param {Intersection} intersection - L'intersection en bout de route.
+     * @returns {boolean} `true` si le véhicule continue (traversée en cours), `false` s'il sort du réseau.
+     */
+    handleEndOfRoad(intersection) {
+        if (this.direction == 'AtoB') {
+            const idx = this.road.vehiclesAtoB.indexOf(this)
+            this.road.vehiclesAtoB.splice(idx, 1)
+
+            const otherRoads = intersection.roads.filter(r => r !== this.road)
+            const nextRoad = otherRoads[Math.floor(Math.random() * otherRoads.length)]
+
+            const exit = this.getScreenPosition()
+            const exitDir = getMarchDirection(this.road, 'AtoB')
+
+            const entry = computeLaneEntryPoint(nextRoad, 'BtoA')
+            const entryDir = getMarchDirection(nextRoad, 'BtoA')
+
+            // Le produit vectoriel détecte si les deux directions sont colinéaires (traversée droite)
+            const cross = exitDir.x * entryDir.y - exitDir.y * entryDir.x
+            const isStraight = Math.abs(cross) &lt; 0.01
+
+            if (isStraight) {
+                const dx = entry.x - exit.x
+                const dy = entry.y - exit.y
+                const distance = Math.sqrt(dx * dx + dy * dy)
+
+                this.state = 'crossing'
+                this.crossing = {
+                    isStraight: true,
+                    startX: exit.x,
+                    startY: exit.y,
+                    endX: entry.x,
+                    endY: entry.y,
+                    progress: 0,
+                    arcLength: distance,
+                    nextRoad,
+                    nextDirection: 'BtoA'
+                }
+                return true
+            }
+
+            const center = computeArcCenter(exit, exitDir, entry, entryDir)
+
+            const radius = Math.sqrt(
+                (exit.x - center.x) ** 2 + (exit.y - center.y) ** 2
+            )
+
+            const startAngle = Math.atan2(exit.y - center.y, exit.x - center.x)
+            const endAngle = Math.atan2(entry.y - center.y, entry.x - center.x)
+
+            // Normalisation du delta angulaire dans [-π, π] pour choisir le plus court arc
+            let delta = endAngle - startAngle
+            while (delta > Math.PI) delta -= 2 * Math.PI
+            while (delta &lt; -Math.PI) delta += 2 * Math.PI
+
+            const arcLength = radius * Math.abs(delta)
+
+            this.state = 'crossing'
+            this.crossing = {
+                isStraight: false,
+                cx: center.x,
+                cy: center.y,
+                radius,
+                startAngle,
+                delta,
+                progress: 0,
+                arcLength,
+                nextRoad,
+                nextDirection: 'BtoA'
+            }
+
+            return true
+        } else {
+            const idx = this.road.vehiclesBtoA.indexOf(this)
+            this.road.vehiclesBtoA.splice(idx, 1)
+            return false
+        }
+    }
+}
+
+/**
+ * Calcule le vecteur unitaire de déplacement d'un véhicule sur une route donnée.
+ * @param {Road} road - La route concernée.
+ * @param {'AtoB'|'BtoA'} direction - Le sens de circulation.
+ * @returns {{ x: number, y: number }} Vecteur unitaire normalisé dans le sens de marche.
+ */
+function getMarchDirection(road, direction) {
+    const { start, end } = road
+    const length = road.length
+
+    if (direction == 'AtoB') {
+        return {
+            x: (end.x - start.x) / length,
+            y: (end.y - start.y) / length
+        }
+    } else {
+        return {
+            x: (start.x - end.x) / length,
+            y: (start.y - end.y) / length
+        }
+    }
+}
+
+/**
+ * Calcule le point d'entrée d'une voie de circulation (avec décalage latéral)
+ * à l'extrémité d'accès d'une route.
+ * Le décalage latéral (LANE_OFFSET = 25px) permet de séparer les deux sens de circulation.
+ * @param {Road} road - La route cible.
+ * @param {'AtoB'|'BtoA'} direction - Le sens dans lequel on entre sur la route.
+ * @returns {{ x: number, y: number }} Coordonnées du point d'entrée de voie.
+ */
+function computeLaneEntryPoint(road, direction) {
+    const { start, end } = road
+    const length = road.length
+
+    const t = direction == 'AtoB' ? 0 : 1
+
+    const centerX = start.x + (end.x - start.x) * t
+    const centerY = start.y + (end.y - start.y) * t
+
+    const dx = (end.x - start.x) / length
+    const dy = (end.y - start.y) / length
+
+    const prepX = -dy
+    const prepY = dx
+
+    const LANE_OFFSET = 25
+    const sign = direction == 'AtoB' ? 1 : -1
+
+    return {
+        x: centerX + prepX * LANE_OFFSET * sign,
+        y: centerY + prepY * LANE_OFFSET * sign
+    }
+}
+
+/**
+ * Calcule le centre de l'arc de cercle permettant de relier deux points
+ * avec leurs directions tangentes respectives.
+ * Résout l'intersection des deux normales aux directions (perpendiculaires) :
+ * le centre de l'arc est le point équidistant des deux extrémités sur ces normales.
+ * @param {{ x: number, y: number }} p1 - Point de départ de l'arc.
+ * @param {{ x: number, y: number }} dir1 - Direction tangente au départ (vecteur unitaire).
+ * @param {{ x: number, y: number }} p2 - Point d'arrivée de l'arc.
+ * @param {{ x: number, y: number }} dir2 - Direction tangente à l'arrivée (vecteur unitaire).
+ * @returns {{ x: number, y: number }} Coordonnées du centre de l'arc de cercle.
+ */
+function computeArcCenter(p1, dir1, p2, dir2) {
+    const perp1 = { x: -dir1.y, y: dir1.x }
+    const perp2 = { x: -dir2.y, y: dir2.x }
+
+    const dx = p2.x - p1.x
+    const dy = p2.y - p1.y
+
+    // det = 0 when perp1 et perp2 sont parallèles (cas droit, déjà filtré)
+    const det = perp2.x * perp1.y - perp1.x * perp2.y
+    if (Math.abs(det) &lt; 0.001) return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }
+
+    const t = (-dx * perp2.y + perp2.x * dy) / det
+
+    return {
+        x: p1.x + t * perp1.x,
+        y: p1.y + t * perp1.y
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Intersection.html">Intersection</a></li><li><a href="module-Road.html">Road</a></li><li><a href="module-Simulation.html">Simulation</a></li><li><a href="module-SimulationCanvas.html">SimulationCanvas</a></li><li><a href="module-StatisticsPanel.html">StatisticsPanel</a></li><li><a href="module-TrafficLight.html">TrafficLight</a></li><li><a href="module-Vehicle.html">Vehicle</a></li><li><a href="module-carrefourMort.html">carrefourMort</a></li><li><a href="module-petiteVille.html">petiteVille</a></li><li><a href="module-renderer.html">renderer</a></li></ul><h3>Classes</h3><ul><li><a href="module-Intersection.Intersection.html">Intersection</a></li><li><a href="module-Road.Road.html">Road</a></li><li><a href="module-Simulation.Simulation.html">Simulation</a></li><li><a href="module-TrafficLight.TrafficLight.html">TrafficLight</a></li><li><a href="module-Vehicle.Vehicle.html">Vehicle</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Tue May 19 2026 09:20:10 GMT+0200 (heure d’été d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

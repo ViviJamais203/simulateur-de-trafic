@@ -1,6 +1,24 @@
+/**
+ * @module Simulation
+ * @description Module principal du moteur de simulation de trafic.
+ */
+
 import { Vehicle } from "./Vehicle";
 
+/**
+ * Représente la simulation de trafic complète.
+ * Gère le cycle de vie des véhicules, les feux de circulation,
+ * la détection des embouteillages et les statistiques en temps réel.
+ */
 export class Simulation {
+    /**
+     * Crée une nouvelle instance de simulation.
+     * @param {{ roads: Road[], intersections: Intersection[] }} network - Le réseau routier à simuler.
+     * @param {number|string} spawnLimit - Nombre total de véhicules à faire circuler avant de terminer.
+     * @param {number|string} spawnInterval - Intervalle de temps (en secondes) entre chaque apparition de véhicule.
+     * @param {number|string} maxSpeed - Vitesse maximale des véhicules (en km/h).
+     * @param {Function} [onFinish] - Callback appelé lorsque la simulation est terminée.
+     */
     constructor(network, spawnLimit, spawnInterval, maxSpeed, onFinish) {
         this.network = network
         this.vehicles = []
@@ -19,6 +37,11 @@ export class Simulation {
         this.statistics = { activeVehicles: 0, averageSpeed: 0, congestionZones: [] }
     }
 
+    /**
+     * Tente de faire apparaître un nouveau véhicule sur une route aléatoire.
+     * Si la limite de véhicules est atteinte ou si la route choisie est pleine,
+     * l'apparition est annulée. Met à jour `allRoadsBlocked` si toutes les routes sont saturées.
+     */
     spawnVehicle() {
         if (this.vehicleSpawned >= this.spawnLimit) {
             this.allRoadsBlocked = false
@@ -38,6 +61,13 @@ export class Simulation {
         this.vehicleSpawned++
     }
 
+    /**
+     * Avance la simulation d'un pas de temps.
+     * Met à jour les intersections, fait apparaître les véhicules selon le timer,
+     * déplace tous les véhicules, retire ceux qui ont quitté le réseau,
+     * et déclenche la fin de simulation si toutes les conditions sont remplies.
+     * @param {number} deltaTime - Temps écoulé depuis le dernier pas (en secondes).
+     */
     step(deltaTime) {
         if (this.finished)
             return
@@ -80,6 +110,14 @@ export class Simulation {
         }
     }
 
+    /**
+     * Détecte et met à jour les zones de congestion sur chaque tronçon.
+     * Une congestion est détectée lorsqu'au moins 2 véhicules en état `on_road`
+     * ont une vitesse inférieure à 15 % de la vitesse maximale.
+     * La zone est caractérisée par la progression minimale et maximale des véhicules arrêtés.
+     * @param {number} deltaTime - Temps écoulé depuis le dernier pas (en secondes),
+     *   utilisé pour incrémenter la durée des zones existantes.
+     */
     updateCongestionZones(deltaTime) {
         const threshold = this.maxSpeed * 0.15
 
@@ -109,6 +147,12 @@ export class Simulation {
         })
     }
 
+    /**
+     * Calcule et met à jour les statistiques de la simulation.
+     * Détermine la vitesse moyenne des véhicules actifs et la position centrale
+     * de chaque zone de congestion en interpolant le long de la route.
+     * @returns {{ activeVehicles: number, averageSpeed: number, congestionZones: Array }} Statistiques actuelles.
+     */
     updateStatistics() {
         let totalSpeed = 0
         this.vehicles.forEach(vehicle => totalSpeed += vehicle.currentSpeed)
@@ -129,6 +173,10 @@ export class Simulation {
         return this.statistics
     }
 
+    /**
+     * Marque la simulation comme terminée et déclenche le callback `onFinish`.
+     * Réinitialise les statistiques affichées à zéro.
+     */
     handleSimulationFinished() {
         this.statistics = { activeVehicles: 0, averageSpeed: 0}
         this.finished = true

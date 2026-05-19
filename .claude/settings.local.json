@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx vite *)",
       "Bash(git restore *)",
-      "Bash(ls D:/simulateur-de-trafic/src/*.css)"
+      "Bash(ls D:/simulateur-de-trafic/src/*.css)",
+      "Bash(Get-ChildItem -Path \"D:\\\\simulateur-de-trafic\" -Recurse -Force)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

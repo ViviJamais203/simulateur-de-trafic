@@ -1,4 +1,38 @@
+/**
+ * @module Vehicle
+ * @description Module gérant les entités véhicules dans la simulation.
+ */
+
+/**
+ * @typedef {Object} CrossingState
+ * @property {boolean} isStraight - Indique si la traversée est en ligne droite.
+ * @property {number} progress - Progression actuelle le long de l'arc (en pixels).
+ * @property {number} arcLength - Longueur totale de l'arc à parcourir (en pixels).
+ * @property {Road} nextRoad - Route à emprunter après la traversée.
+ * @property {string} nextDirection - Direction sur la prochaine route ('AtoB' ou 'BtoA').
+ * @property {number} [startX] - Point de départ X (traversée droite uniquement).
+ * @property {number} [startY] - Point de départ Y (traversée droite uniquement).
+ * @property {number} [endX] - Point d'arrivée X (traversée droite uniquement).
+ * @property {number} [endY] - Point d'arrivée Y (traversée droite uniquement).
+ * @property {number} [cx] - Centre X de l'arc (traversée courbée uniquement).
+ * @property {number} [cy] - Centre Y de l'arc (traversée courbée uniquement).
+ * @property {number} [radius] - Rayon de l'arc (traversée courbée uniquement).
+ * @property {number} [startAngle] - Angle de départ en radians (traversée courbée uniquement).
+ * @property {number} [delta] - Variation angulaire totale en radians (traversée courbée uniquement).
+ */
+
+/**
+ * Représente un véhicule dans la simulation de trafic.
+ * Un véhicule peut être dans deux états : `on_road` (sur une route) ou `crossing` (en traversée d'intersection).
+ */
 export class Vehicle {
+    /**
+     * Crée un nouveau véhicule et l'enregistre sur sa route initiale.
+     * @param {number} id - Identifiant unique du véhicule.
+     * @param {Road} road - Route initiale sur laquelle le véhicule apparaît.
+     * @param {'AtoB'|'BtoA'} direction - Sens de circulation sur la route.
+     * @param {number} speed - Vitesse de base du véhicule (en km/h).
+     */
     constructor(id, road, direction, speed) {
         this.id = id
         this.road = road
@@ -16,6 +50,13 @@ export class Vehicle {
         }
     }
 
+    /**
+     * Met à jour la position du véhicule pour ce pas de temps.
+     * - En état `on_road` : calcule le facteur de vitesse et avance selon `progress`.
+     * - En état `crossing` : avance à vitesse constante le long de l'arc de traversée,
+     *   puis bascule sur la prochaine route une fois l'arc terminé.
+     * @param {number} deltaTime - Temps écoulé depuis le dernier pas (en secondes).
+     */
     update(deltaTime) {
         if (this.state == 'on_road') {
             const speedFactor = this.computeSpeedFactor()
@@ -40,6 +81,17 @@ export class Vehicle {
         }
     }
 
+    /**
+     * Calcule le facteur de vitesse du véhicule selon son environnement immédiat.
+     * Deux obstacles sont pris en compte : le véhicule devant et le feu rouge en bout de route.
+     *
+     * La logique de freinage suit une rampe linéaire :
+     * - Distance < SAFE_DISTANCE (20px)    → facteur = 0 (arrêt complet)
+     * - Distance < BRAKING_DISTANCE (60px) → facteur entre 0 et 1 (freinage progressif)
+     * - Distance ≥ BRAKING_DISTANCE        → facteur = 1 (vitesse nominale)
+     *
+     * @returns {number} Facteur de vitesse entre 0 (arrêt) et 1 (pleine vitesse).
+     */
     computeSpeedFactor() {
         const SAFE_DISTANCE = 20
         const BRAKING_DISTANCE = 60
@@ -63,6 +115,13 @@ export class Vehicle {
         return 1
     }
 
+    /**
+     * Retourne la distance entre le véhicule et le feu rouge en bout de sa route.
+     * Ne s'applique qu'aux véhicules circulant dans le sens AtoB, car les feux
+     * sont positionnés à l'extrémité `end` des routes (endIntersection).
+     * @returns {number|null} Distance jusqu'au feu (en pixels), ou `null` si inapplicable
+     *   (sens BtoA, pas d'intersection, ou feu vert).
+     */
     getDistanceToRedLight() {
         if (this.direction !== 'AtoB') return null
         const intersection = this.road.endIntersection
@@ -72,10 +131,21 @@ export class Vehicle {
         return this.road.length - this.progress
     }
 
+    /**
+     * Vérifie si le véhicule a atteint l'extrémité de sa route courante.
+     * @returns {boolean} `true` si le véhicule est en état `on_road` et que sa progression dépasse la longueur de la route.
+     */
     hasReachedEnd() {
         return this.state == 'on_road' && this.progress >= this.road.length
     }
 
+    /**
+     * Calcule la position du véhicule en pixels sur le canvas.
+     * - En état `crossing` : interpolation linéaire ou angulaire le long de l'arc de traversée.
+     * - En état `on_road` : interpolation le long de la route avec un décalage latéral de voie
+     *   de 25px (LANE_OFFSET) pour séparer les deux sens de circulation.
+     * @returns {{ x: number, y: number }} Coordonnées en pixels sur le canvas.
+     */
     getScreenPosition() {
         if (this.state == 'crossing') {
             const c = this.crossing
@@ -123,6 +193,15 @@ export class Vehicle {
         return { x, y }
     }
 
+    /**
+     * Gère le comportement du véhicule lorsqu'il atteint l'extrémité d'une route.
+     * - Sens AtoB : retire le véhicule de la route courante, sélectionne aléatoirement
+     *   une route adjacente via l'intersection, puis initie une traversée d'intersection
+     *   (droite si les routes sont colinéaires, courbée sinon).
+     * - Sens BtoA : retire le véhicule du réseau (il a quitté le territoire simulé).
+     * @param {Intersection} intersection - L'intersection en bout de route.
+     * @returns {boolean} `true` si le véhicule continue (traversée en cours), `false` s'il sort du réseau.
+     */
     handleEndOfRoad(intersection) {
         if (this.direction == 'AtoB') {
             const idx = this.road.vehiclesAtoB.indexOf(this)
@@ -137,6 +216,7 @@ export class Vehicle {
             const entry = computeLaneEntryPoint(nextRoad, 'BtoA')
             const entryDir = getMarchDirection(nextRoad, 'BtoA')
 
+            // Le produit vectoriel détecte si les deux directions sont colinéaires (traversée droite)
             const cross = exitDir.x * entryDir.y - exitDir.y * entryDir.x
             const isStraight = Math.abs(cross) < 0.01
 
@@ -169,6 +249,7 @@ export class Vehicle {
             const startAngle = Math.atan2(exit.y - center.y, exit.x - center.x)
             const endAngle = Math.atan2(entry.y - center.y, entry.x - center.x)
 
+            // Normalisation du delta angulaire dans [-π, π] pour choisir le plus court arc
             let delta = endAngle - startAngle
             while (delta > Math.PI) delta -= 2 * Math.PI
             while (delta < -Math.PI) delta += 2 * Math.PI
@@ -198,6 +279,12 @@ export class Vehicle {
     }
 }
 
+/**
+ * Calcule le vecteur unitaire de déplacement d'un véhicule sur une route donnée.
+ * @param {Road} road - La route concernée.
+ * @param {'AtoB'|'BtoA'} direction - Le sens de circulation.
+ * @returns {{ x: number, y: number }} Vecteur unitaire normalisé dans le sens de marche.
+ */
 function getMarchDirection(road, direction) {
     const { start, end } = road
     const length = road.length
@@ -215,6 +302,14 @@ function getMarchDirection(road, direction) {
     }
 }
 
+/**
+ * Calcule le point d'entrée d'une voie de circulation (avec décalage latéral)
+ * à l'extrémité d'accès d'une route.
+ * Le décalage latéral (LANE_OFFSET = 25px) permet de séparer les deux sens de circulation.
+ * @param {Road} road - La route cible.
+ * @param {'AtoB'|'BtoA'} direction - Le sens dans lequel on entre sur la route.
+ * @returns {{ x: number, y: number }} Coordonnées du point d'entrée de voie.
+ */
 function computeLaneEntryPoint(road, direction) {
     const { start, end } = road
     const length = road.length
@@ -239,6 +334,17 @@ function computeLaneEntryPoint(road, direction) {
     }
 }
 
+/**
+ * Calcule le centre de l'arc de cercle permettant de relier deux points
+ * avec leurs directions tangentes respectives.
+ * Résout l'intersection des deux normales aux directions (perpendiculaires) :
+ * le centre de l'arc est le point équidistant des deux extrémités sur ces normales.
+ * @param {{ x: number, y: number }} p1 - Point de départ de l'arc.
+ * @param {{ x: number, y: number }} dir1 - Direction tangente au départ (vecteur unitaire).
+ * @param {{ x: number, y: number }} p2 - Point d'arrivée de l'arc.
+ * @param {{ x: number, y: number }} dir2 - Direction tangente à l'arrivée (vecteur unitaire).
+ * @returns {{ x: number, y: number }} Coordonnées du centre de l'arc de cercle.
+ */
 function computeArcCenter(p1, dir1, p2, dir2) {
     const perp1 = { x: -dir1.y, y: dir1.x }
     const perp2 = { x: -dir2.y, y: dir2.x }

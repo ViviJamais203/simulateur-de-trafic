@@ -1,6 +1,23 @@
+/**
+ * @module Intersection
+ * @description Module gérant les intersections et leur cycle de feux de circulation.
+ */
+
 import { TrafficLight } from "./TrafficLight"
 
+/**
+ * Représente une intersection routière avec gestion automatique des feux de circulation.
+ * Les feux sont activés un par un dans l'ordre horaire, avec une courte période de transition
+ * (tous au rouge) entre chaque changement de feu actif.
+ */
 export class Intersection {
+    /**
+     * Crée une nouvelle intersection.
+     * @param {string} id - Identifiant unique de l'intersection.
+     * @param {number} x - Coordonnée X du centre de l'intersection sur le canvas.
+     * @param {number} y - Coordonnée Y du centre de l'intersection sur le canvas.
+     * @param {number} cycleDuration - Durée pendant laquelle un feu reste au vert (en secondes).
+     */
     constructor(id, x, y, cycleDuration) {
         this.id = id
         this.x = x
@@ -14,12 +31,22 @@ export class Intersection {
         this.transitionTimer = 0
         this.transitionDuration = 1
     }
-    
+
+    /**
+     * Rattache une route à cette intersection et définit son `endIntersection`.
+     * Doit être appelé avant `initTrafficLights`.
+     * @param {Road} road - La route à connecter à l'intersection.
+     */
     addRoad(road) {
         this.roads.push(road)
         road.endIntersection = this
     }
 
+    /**
+     * Initialise les feux de circulation pour toutes les routes connectées.
+     * Trie les routes dans le sens horaire, crée un feu par route,
+     * et met le premier feu au vert.
+     */
     initTrafficLights() {
         this.roads = sortRoadsClockwise(this.roads, this.x, this.y)
         this.lights = this.roads.map(road => new TrafficLight(road))
@@ -28,6 +55,13 @@ export class Intersection {
         }
     }
 
+    /**
+     * Met à jour le cycle des feux de circulation pour ce pas de temps.
+     * Alterne entre deux phases :
+     * - Phase "transition" (1 seconde) : tous les feux sont au rouge entre deux cycles.
+     * - Phase "cycle" : un seul feu est au vert pendant `cycleDuration` secondes.
+     * @param {number} deltaTime - Temps écoulé depuis le dernier pas (en secondes).
+     */
     update(deltaTime) {
         if (this.lights.length == 0) return
 
@@ -51,11 +85,25 @@ export class Intersection {
         }
     }
 
+    /**
+     * Retourne le feu de circulation associé à une route donnée.
+     * @param {Road} road - La route dont on cherche le feu.
+     * @returns {TrafficLight|undefined} Le feu correspondant, ou `undefined` si non trouvé.
+     */
     getLightForRoad(road) {
         return this.lights.find(l => l.road == road)
     }
 }
 
+/**
+ * Trie un tableau de routes dans le sens horaire par rapport à un centre donné.
+ * Pour chaque route, calcule l'angle `atan2` depuis le centre vers l'extrémité
+ * externe de la route (le point qui n'est pas le centre de l'intersection).
+ * @param {Road[]} roads - Le tableau de routes à trier.
+ * @param {number} cx - Coordonnée X du centre de référence.
+ * @param {number} cy - Coordonnée Y du centre de référence.
+ * @returns {Road[]} Nouveau tableau de routes trié dans le sens horaire.
+ */
 function sortRoadsClockwise(roads, cx, cy) {
     return [...roads]
         .map(road => {

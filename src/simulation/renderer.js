@@ -1,8 +1,23 @@
+/**
+ * @module renderer
+ * @description Module de rendu 2D du simulateur sur un canvas HTML.
+ * Dessine les routes, les intersections, les feux de circulation,
+ * les zones de congestion et les véhicules.
+ */
+
 const ROAD_WIDTH = 100
 const VEHICLE_RADIUS = 6
 const LIGHT_RADIUS = 8
 const LIGHT_EDGE_MARGIN = 8
 
+/**
+ * Efface le canvas et redessine l'ensemble de la scène de simulation.
+ * Ordre de dessin : routes → zones de congestion → intersections (avec feux) → véhicules.
+ * @param {CanvasRenderingContext2D} ctx - Contexte 2D du canvas.
+ * @param {{ roads: Road[], intersections: Intersection[] }} network - Le réseau routier à dessiner.
+ * @param {Vehicle[]} [vehicles=[]] - Liste des véhicules actifs à dessiner.
+ * @param {Map<string, Object>} [congestionZones=new Map()] - Zones de congestion indexées par clé `roadId-direction`.
+ */
 export function render(ctx, network, vehicles = [], congestionZones = new Map()) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
@@ -12,6 +27,12 @@ export function render(ctx, network, vehicles = [], congestionZones = new Map())
     vehicles.forEach(vehicle => drawVehicle(ctx, vehicle))
 }
 
+/**
+ * Dessine un tronçon routier : fond gris foncé (largeur ROAD_WIDTH = 100px)
+ * surmonté d'une ligne blanche centrale en pointillés (tirets 20px / espaces 20px).
+ * @param {CanvasRenderingContext2D} ctx - Contexte 2D du canvas.
+ * @param {Road} road - Le tronçon à dessiner.
+ */
 function drawRoad(ctx, road) {
     ctx.strokeStyle = '#374151'
     ctx.lineWidth = ROAD_WIDTH
@@ -31,6 +52,12 @@ function drawRoad(ctx, road) {
     ctx.setLineDash([])
 }
 
+/**
+ * Dessine une intersection sous forme de carré ou d'hexagone selon `intersection.shape`,
+ * puis dessine les feux de circulation associés à chaque route connectée.
+ * @param {CanvasRenderingContext2D} ctx - Contexte 2D du canvas.
+ * @param {Intersection} intersection - L'intersection à dessiner.
+ */
 function drawIntersection(ctx, intersection) {
     if (intersection.shape === 'hexagon') {
         drawHexagon(ctx, intersection)
@@ -47,6 +74,12 @@ function drawIntersection(ctx, intersection) {
     intersection.lights.forEach(light => drawTrafficLight(ctx, light, intersection))
 }
 
+/**
+ * Dessine un hexagone régulier pour représenter une intersection hexagonale.
+ * L'hexagone est orienté pointe en haut grâce à un décalage angulaire de `Math.PI / 6`.
+ * @param {CanvasRenderingContext2D} ctx - Contexte 2D du canvas.
+ * @param {Intersection} intersection - L'intersection dont `shapeRadius` définit le rayon.
+ */
 function drawHexagon(ctx, intersection) {
     const R = intersection.shapeRadius
     ctx.fillStyle = '#1f2937'
@@ -62,6 +95,14 @@ function drawHexagon(ctx, intersection) {
     ctx.fill()
 }
 
+/**
+ * Dessine le feu de circulation d'une route à l'extrémité `end` de celle-ci,
+ * décalé latéralement vers l'extérieur de la chaussée (ROAD_WIDTH / 2 + LIGHT_EDGE_MARGIN).
+ * Couleur : vert (#22c55e) si feu vert, rouge (#ef4444) sinon.
+ * @param {CanvasRenderingContext2D} ctx - Contexte 2D du canvas.
+ * @param {TrafficLight} light - Le feu à dessiner.
+ * @param {Intersection} intersection - L'intersection contenant ce feu (sert à calculer l'orientation de la route).
+ */
 function drawTrafficLight(ctx, light, intersection) {
     const road = light.road
 
@@ -93,6 +134,14 @@ function drawTrafficLight(ctx, light, intersection) {
 
 const LANE_OFFSET = 25
 
+/**
+ * Dessine la zone de congestion d'une voie sous forme d'un segment épais
+ * orange semi-transparent (rgba(255, 120, 0, 0.4)).
+ * La zone s'étend de `minProgress` à `maxProgress` le long de la voie,
+ * en respectant le décalage latéral de voie (LANE_OFFSET = 25px).
+ * @param {CanvasRenderingContext2D} ctx - Contexte 2D du canvas.
+ * @param {{ road: Road, direction: string, minProgress: number, maxProgress: number }} zone - La zone de congestion à dessiner.
+ */
 function drawCongestionZone(ctx, zone) {
     const { road, direction, minProgress, maxProgress } = zone
     const { start, end } = road
@@ -123,6 +172,12 @@ function drawCongestionZone(ctx, zone) {
     ctx.restore()
 }
 
+/**
+ * Dessine un véhicule sous forme de disque cyan (#00ffff) de rayon VEHICLE_RADIUS (6px)
+ * à sa position actuelle sur le canvas, calculée via `vehicle.getScreenPosition()`.
+ * @param {CanvasRenderingContext2D} ctx - Contexte 2D du canvas.
+ * @param {Vehicle} vehicle - Le véhicule à dessiner.
+ */
 function drawVehicle(ctx, vehicle) {
     const { x, y } = vehicle.getScreenPosition()
 
